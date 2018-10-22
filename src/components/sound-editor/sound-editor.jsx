@@ -103,7 +103,7 @@ const messages = defineMessages({
 });
 
 const SoundEditor = props => (
-    <div className={styles.editorContainer}>
+    <div className={styleMedia.editorContainer}>
         <div className={styles.row}>
             <div className={styles.inputGroup}>
                 <Label text={props.intl.formatMessage(messages.sound)}>
