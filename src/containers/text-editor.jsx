@@ -1,12 +1,8 @@
 import React from 'react';
 import TextEditorComponent from '../components/text-editor/text-editor.jsx';
 
-class TextEditor extends React.Component {
-    render () {
-        return (
-            <TextEditorComponent />
-        );
-    }
-}
+const TextEditor = () => (
+    <TextEditorComponent />
+);
 
 export default TextEditor;
