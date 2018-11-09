@@ -5,14 +5,14 @@ import AssetPanel from '../components/asset-panel/asset-panel.jsx';
 const onItemClick = () => {};
 const selectedItemIndex = 0;
 
-const TextTab = () => (
+const TextTab = props => (
     <AssetPanel
         buttons={[]}
         items={[]}
         selectedItemIndex={selectedItemIndex}
         onItemClick={onItemClick}
     >
-        <TextEditor />
+        <TextEditor vm={props.vm} />
     </AssetPanel>
 );
 
