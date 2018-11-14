@@ -59,12 +59,17 @@ const GUIComponent = props => {
         accountNavOpen,
         activeTabIndex,
         alertsVisible,
+        authorId,
+        authorThumbnailUrl,
+        authorUsername,
         basePath,
         backdropLibraryVisible,
-        backpackOptions,
+        backpackHost,
+        backpackVisible,
         blocksTabVisible,
         cardsVisible,
         canCreateNew,
+        canEditTitle,
         canRemix,
         canSave,
         canCreateCopy,
@@ -181,8 +186,12 @@ const GUIComponent = props => {
                 ) : null}
                 <MenuBar
                     accountNavOpen={accountNavOpen}
+                    authorId={authorId}
+                    authorThumbnailUrl={authorThumbnailUrl}
+                    authorUsername={authorUsername}
                     canCreateCopy={canCreateCopy}
                     canCreateNew={canCreateNew}
+                    canEditTitle={canEditTitle}
                     canRemix={canRemix}
                     canSave={canSave}
                     canShare={canShare}
@@ -309,8 +318,8 @@ const GUIComponent = props => {
                                     <TextTab vm={vm} />
                                 </TabPanel>
                             </Tabs>
-                            {backpackOptions.visible ? (
-                                <Backpack host={backpackOptions.host} />
+                            {backpackVisible ? (
+                                <Backpack host={backpackHost} />
                             ) : null}
                         </Box>
 
@@ -338,15 +347,17 @@ const GUIComponent = props => {
 GUIComponent.propTypes = {
     accountNavOpen: PropTypes.bool,
     activeTabIndex: PropTypes.number,
+    authorId: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]), // can be false
+    authorThumbnailUrl: PropTypes.string,
+    authorUsername: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]), // can be false
     backdropLibraryVisible: PropTypes.bool,
-    backpackOptions: PropTypes.shape({
-        host: PropTypes.string,
-        visible: PropTypes.bool
-    }),
+    backpackHost: PropTypes.string,
+    backpackVisible: PropTypes.bool,
     basePath: PropTypes.string,
     blocksTabVisible: PropTypes.bool,
     canCreateCopy: PropTypes.bool,
     canCreateNew: PropTypes.bool,
+    canEditTitle: PropTypes.bool,
     canRemix: PropTypes.bool,
     canSave: PropTypes.bool,
     canShare: PropTypes.bool,
@@ -387,12 +398,11 @@ GUIComponent.propTypes = {
     vm: PropTypes.instanceOf(VM).isRequired
 };
 GUIComponent.defaultProps = {
-    backpackOptions: {
-        host: null,
-        visible: false
-    },
+    backpackHost: null,
+    backpackVisible: false,
     basePath: './',
     canCreateNew: false,
+    canEditTitle: false,
     canRemix: false,
     canSave: false,
     canCreateCopy: false,

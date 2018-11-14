@@ -4,19 +4,22 @@ import {connect} from 'react-redux';
 import VM from 'scratch-vm';
 
 import storage from '../lib/storage';
+import {showStandardAlert} from '../reducers/alerts';
 import {
     LoadingStates,
+    autoUpdateProject,
     createProject,
     doneCreatingProject,
     doneUpdatingProject,
     getIsCreatingCopy,
     getIsCreatingNew,
+    getIsManualUpdating,
     getIsRemixing,
-    getIsShowingProject,
+    getIsShowingWithId,
     getIsShowingWithoutId,
     getIsUpdating,
-    projectError,
-    updateProject
+    manualUpdateProject,
+    projectError
 } from '../reducers/project-state';
 
 /**
@@ -32,51 +35,16 @@ const ProjectSaverHOC = function (WrappedComponent) {
     class ProjectSaverComponent extends React.Component {
         componentDidUpdate (prevProps) {
             if (this.props.isUpdating && !prevProps.isUpdating) {
-                this.storeProject(this.props.reduxProjectId)
-                    .then(() => {
-                        // there is nothing we expect to find in response that we need to check here
-                        this.props.onUpdatedProject(this.props.loadingState);
-                    })
-                    .catch(err => {
-                        // NOTE: should throw up a notice for user
-                        this.props.onProjectError(`Saving the project failed with error: ${err}`);
-                    });
+                this.updateProjectToStorage();
             }
-            // TODO: distinguish between creating new, remixing, and saving as a copy
             if (this.props.isCreatingNew && !prevProps.isCreatingNew) {
-                this.storeProject(null)
-                    .then(response => {
-                        this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
-                    })
-                    .catch(err => {
-                        this.props.onProjectError(`Creating a new project failed with error: ${err}`);
-                    });
+                this.createNewProjectToStorage();
             }
             if (this.props.isCreatingCopy && !prevProps.isCreatingCopy) {
-                this.storeProject(null, {
-                    original_id: this.props.reduxProjectId,
-                    is_copy: 1,
-                    title: this.props.reduxProjectTitle
-                })
-                    .then(response => {
-                        this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
-                    })
-                    .catch(err => {
-                        this.props.onProjectError(`Creating a project copy failed with error: ${err}`);
-                    });
+                this.createCopyToStorage();
             }
             if (this.props.isRemixing && !prevProps.isRemixing) {
-                this.storeProject(null, {
-                    original_id: this.props.reduxProjectId,
-                    is_remix: 1,
-                    title: this.props.reduxProjectTitle
-                })
-                    .then(response => {
-                        this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
-                    })
-                    .catch(err => {
-                        this.props.onProjectError(`Remixing a project failed with error: ${err}`);
-                    });
+                this.createRemixToStorage();
             }
 
             // check if the project state, and user capabilities, have changed so as to indicate
@@ -91,10 +59,75 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 // if we're newly able to save this project, save it!
                 const showingSaveable = this.props.canSave && this.props.isShowingWithId;
                 const becameAbleToSave = this.props.canSave && !prevProps.canSave;
-                if (showingSaveable && becameAbleToSave) {
-                    this.props.onUpdateProject();
+                const becameShared = this.props.isShared && !prevProps.isShared;
+                if (showingSaveable && (becameAbleToSave || becameShared)) {
+                    this.props.onAutoUpdateProject();
                 }
             }
+        }
+        componentWillUnmount () {
+            const showingSaveable = this.props.canSave && this.props.isShowingWithId;
+            if (showingSaveable) {
+                this.updateProjectToStorage();
+            }
+        }
+        updateProjectToStorage () {
+            if (this.props.isManualUpdating) {
+                this.props.onShowSavingAlert();
+            }
+            return this.storeProject(this.props.reduxProjectId)
+                .then(() => {
+                    if (this.props.isManualUpdating) {
+                        this.props.onShowSaveSuccessAlert();
+                    }
+                    // there is nothing we expect to find in response that we need to check here
+                    this.props.onUpdatedProject(this.props.loadingState);
+                })
+                .catch(err => {
+                    // NOTE: should throw up a notice for user
+                    this.props.onProjectError(`Saving the project failed with error: ${err}`);
+                });
+        }
+        createNewProjectToStorage () {
+            this.props.onShowCreatingAlert();
+            return this.storeProject(null)
+                .then(response => {
+                    this.props.onShowCreateSuccessAlert();
+                    this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
+                })
+                .catch(err => {
+                    this.props.onProjectError(`Creating a new project failed with error: ${err}`);
+                });
+        }
+        createCopyToStorage () {
+            this.props.onShowCreatingAlert();
+            return this.storeProject(null, {
+                original_id: this.props.reduxProjectId,
+                is_copy: 1,
+                title: this.props.reduxProjectTitle
+            })
+                .then(response => {
+                    this.props.onShowCreateSuccessAlert();
+                    this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
+                })
+                .catch(err => {
+                    this.props.onProjectError(`Creating a project copy failed with error: ${err}`);
+                });
+        }
+        createRemixToStorage () {
+            this.props.onShowCreatingAlert();
+            return this.storeProject(null, {
+                original_id: this.props.reduxProjectId,
+                is_remix: 1,
+                title: this.props.reduxProjectTitle
+            })
+                .then(response => {
+                    this.props.onShowCreateSuccessAlert();
+                    this.props.onCreatedProject(response.id.toString(), this.props.loadingState);
+                })
+                .catch(err => {
+                    this.props.onProjectError(`Remixing a project failed with error: ${err}`);
+                });
         }
         /**
          * storeProject:
@@ -127,18 +160,24 @@ const ProjectSaverHOC = function (WrappedComponent) {
         render () {
             const {
                 /* eslint-disable no-unused-vars */
-                isCreatingCopy: isCreatingCopyProp,
-                isCreatingNew: isCreatingNewProp,
-                isRemixing: isRemixingProp,
-                isShowingWithId: isShowingWithIdProp,
-                isShowingWithoutId: isShowingWithoutIdProp,
-                isUpdating: isUpdatingProp,
+                isCreatingCopy,
+                isCreatingNew,
+                isManualUpdating,
+                isRemixing,
+                isShowingWithId,
+                isShowingWithoutId,
+                isUpdating,
                 loadingState,
-                onCreatedProject: onCreatedProjectProp,
-                onCreateProject: onCreateProjectProp,
-                onProjectError: onProjectErrorProp,
-                onUpdatedProject: onUpdatedProjectProp,
-                onUpdateProject: onUpdateProjectProp,
+                onAutoUpdateProject,
+                onCreatedProject,
+                onCreateProject,
+                onManualUpdateProject,
+                onProjectError,
+                onShowCreateSuccessAlert,
+                onShowCreatingAlert,
+                onShowSaveSuccessAlert,
+                onShowSavingAlert,
+                onUpdatedProject,
                 reduxProjectId,
                 reduxProjectTitle,
                 /* eslint-enable no-unused-vars */
@@ -151,20 +190,28 @@ const ProjectSaverHOC = function (WrappedComponent) {
             );
         }
     }
+
     ProjectSaverComponent.propTypes = {
         canCreateNew: PropTypes.bool,
         canSave: PropTypes.bool,
         isCreatingCopy: PropTypes.bool,
         isCreatingNew: PropTypes.bool,
+        isManualUpdating: PropTypes.bool,
         isRemixing: PropTypes.bool,
+        isShared: PropTypes.bool,
         isShowingWithId: PropTypes.bool,
         isShowingWithoutId: PropTypes.bool,
         isUpdating: PropTypes.bool,
         loadingState: PropTypes.oneOf(LoadingStates),
+        onAutoUpdateProject: PropTypes.func,
         onCreateProject: PropTypes.func,
         onCreatedProject: PropTypes.func,
+        onManualUpdateProject: PropTypes.func,
         onProjectError: PropTypes.func,
-        onUpdateProject: PropTypes.func,
+        onShowCreateSuccessAlert: PropTypes.func,
+        onShowCreatingAlert: PropTypes.func,
+        onShowSaveSuccessAlert: PropTypes.func,
+        onShowSavingAlert: PropTypes.func,
         onUpdatedProject: PropTypes.func,
         reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         reduxProjectTitle: PropTypes.string,
@@ -176,9 +223,10 @@ const ProjectSaverHOC = function (WrappedComponent) {
             isCreatingCopy: getIsCreatingCopy(loadingState),
             isCreatingNew: getIsCreatingNew(loadingState),
             isRemixing: getIsRemixing(loadingState),
-            isShowingWithId: getIsShowingProject(loadingState),
+            isShowingWithId: getIsShowingWithId(loadingState),
             isShowingWithoutId: getIsShowingWithoutId(loadingState),
             isUpdating: getIsUpdating(loadingState),
+            isManualUpdating: getIsManualUpdating(loadingState),
             loadingState: loadingState,
             reduxProjectId: state.scratchGui.projectState.projectId,
             reduxProjectTitle: state.scratchGui.projectTitle,
@@ -186,10 +234,15 @@ const ProjectSaverHOC = function (WrappedComponent) {
         };
     };
     const mapDispatchToProps = dispatch => ({
+        onAutoUpdateProject: () => dispatch(autoUpdateProject()),
         onCreatedProject: (projectId, loadingState) => dispatch(doneCreatingProject(projectId, loadingState)),
         onCreateProject: () => dispatch(createProject()),
+        onManualUpdateProject: () => dispatch(manualUpdateProject()),
         onProjectError: error => dispatch(projectError(error)),
-        onUpdateProject: () => dispatch(updateProject()),
+        onShowCreateSuccessAlert: () => dispatch(showStandardAlert('createSuccess')),
+        onShowCreatingAlert: () => dispatch(showStandardAlert('creating')),
+        onShowSaveSuccessAlert: () => dispatch(showStandardAlert('saveSuccess')),
+        onShowSavingAlert: () => dispatch(showStandardAlert('saving')),
         onUpdatedProject: (projectId, loadingState) => dispatch(doneUpdatingProject(projectId, loadingState))
     });
     // Allow incoming props to override redux-provided props. Used to mock in tests.
