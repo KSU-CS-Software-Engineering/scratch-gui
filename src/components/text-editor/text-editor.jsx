@@ -35,6 +35,7 @@ class TextEditor extends React.Component {
     componentDidUpdate (prevProps) {
         if (this.props.blocks !== prevProps.blocks) {
             this.updateBlocks(this.props.blocks);
+            console.log(this.props.blocks);
         }
     }
 
@@ -52,6 +53,17 @@ class TextEditor extends React.Component {
         monaco.languages.setMonarchTokensProvider('scratch-text', {
             tokenizer: {
                 root: [
+                    /**
+                     * Do next:
+                     * these are sample root tokenizers
+                     * DO NOT HARD CODE
+                     * use LangDef from ./scratch-text to populate this dynamically
+                     * look in scratch-text for more information about the 'defs' object
+                     * inspect console in browser of console.log(defs)
+                     * to see how defs is structured as an object.
+                     * In order for this to work, you need to manipulate defs to get all
+                     * elements structured like the examples used below.
+                     */
                     [/replace item .+ of .+ with .+/, 'data'],
                     [/variable .+/, 'variables'],
                     [/Turn .+ degrees right/, 'motion'],
