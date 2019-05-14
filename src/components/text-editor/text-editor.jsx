@@ -51,7 +51,15 @@ class TextEditor extends React.Component {
         monaco.languages.register({id: 'scratch-text'});
         monaco.languages.setMonarchTokensProvider('scratch-text', {
             tokenizer: {
-                root: [[/replace item .+ of .+ with .+/, 'data'], [/Turn .+ degrees right/, 'motion']]
+                root: [
+                    [/replace item .+ of .+ with .+/, 'data'],
+                    [/Turn .+ degrees right/, 'motion'],
+                    [/when .+ clicked/, 'event'],
+                    [/set .+ to .+/, 'data'],
+                    [/repeat until .+/, 'control'],
+                    [/say .+/, 'looks'],
+                    [/.+ \+ .+/, 'operators']
+                ]
             }
         });
         monaco.editor.defineTheme('ScratchTextTheme', {
@@ -61,7 +69,7 @@ class TextEditor extends React.Component {
                 {token: 'motion', foreground: '4c97ff'},
                 {token: 'looks', foreground: '9966ff'},
                 {token: 'sound', foreground: 'd65cd6'},
-                {token: 'events', foreground: 'ffd500'},
+                {token: 'event', foreground: 'ffd500'},
                 {token: 'control', foreground: 'ffab19'},
                 {token: 'sensing', foreground: '4cbfe6'},
                 {token: 'operators', foreground: '40bf4a'},
