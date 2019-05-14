@@ -53,6 +53,7 @@ class TextEditor extends React.Component {
             tokenizer: {
                 root: [
                     [/replace item .+ of .+ with .+/, 'data'],
+                    [/variable .+/, 'variables'],
                     [/Turn .+ degrees right/, 'motion'],
                     [/when .+ clicked/, 'event'],
                     [/set .+ to .+/, 'data'],
