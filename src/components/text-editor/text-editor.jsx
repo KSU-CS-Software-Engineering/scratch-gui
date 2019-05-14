@@ -209,6 +209,7 @@ class TextEditor extends React.Component {
                     theme="ScratchTextTheme"
                     value={blocksText}
                     width="100%"
+                    onChange={this.handleOnChange}
 
                 />
             </div>
