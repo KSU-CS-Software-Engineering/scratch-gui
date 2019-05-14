@@ -6,14 +6,12 @@
  */
 import ScratchBlocks from 'scratch-blocks';
 // console.log(ScratchBlocks.msg.HELP);
-let defs = {
+const defs = {
     // Set defaultToken to invalid to see what you do not tokenize yet
     // defaultToken: 'invalid',
 
     // /when key (\w+) is pressed/
-    keywords: [
-
-    ],
+    keywords: [],
 
     // we include these common regular expressions
     symbols: /[=><!~?:&|+\-*/^%]+/,
@@ -28,12 +26,15 @@ let defs = {
             [/[{}[\]()]/, '@brackets'],
 
             [/@[a-zA-Z]\w*/, 'tag'],
-            [/[a-zA-Z]\w*/, {
-                cases: {
-                    '@keywords': 'keyword',
-                    '@default': 'identifier'
+            [
+                /[a-zA-Z]\w*/,
+                {
+                    cases: {
+                        '@keywords': 'keyword',
+                        '@default': 'identifier'
+                    }
                 }
-            }]
+            ]
         ],
 
         // Deal with white space, including single and multi-line comments
@@ -44,16 +45,8 @@ let defs = {
             [/'''.*$/, 'string', '@endDocString'],
             [/""".*$/, 'string', '@endDblDocString']
         ],
-        endDocString: [
-            [/\\'/, 'string'],
-            [/.*'''/, 'string', '@popall'],
-            [/.*$/, 'string']
-        ],
-        endDblDocString: [
-            [/\\"/, 'string'],
-            [/.*"""/, 'string', '@popall'],
-            [/.*$/, 'string']
-        ],
+        endDocString: [[/\\'/, 'string'], [/.*'''/, 'string', '@popall'], [/.*$/, 'string']],
+        endDblDocString: [[/\\"/, 'string'], [/.*"""/, 'string', '@popall'], [/.*$/, 'string']],
 
         // Recognize hex, negatives, decimals, imaginaries, longs, and scientific notation
         numbers: [
@@ -91,7 +84,7 @@ let defs = {
  * @returns {array} should hold a list of all blocks as defined in this file:
  * https://github.com/KSU-CS-Software-Engineering/scratch-blocks/blob/develop/msg/messages.js
  */
-export default function LangDef (){
+export default function LangDef () {
     Object.keys(ScratchBlocks.Msg).forEach(msg => {
         // For some example, say msg: CONTROL_FOREACH
         // Get the class

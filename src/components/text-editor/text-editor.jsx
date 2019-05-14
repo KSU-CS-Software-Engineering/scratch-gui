@@ -31,6 +31,7 @@ class TextEditor extends React.Component {
             newText: ''
         };
         this.handleOnChange = this.handleOnChange.bind(this);
+        // this.editorWillMount = this.editorWillMount.bind(this);
     }
 
     /**
@@ -45,38 +46,99 @@ class TextEditor extends React.Component {
         }
     }
 
+    // editorWillMount (monaco) {
+    //     monaco.languages.register({id: 'scratch-text'});
+    //     // // monaco.languages.setMonarchTokensProvider('scratch-text', LangDef());
+    //     // const keyValues = LangDef();
+    //     // const modKV = Object.entries(keyValues.tokenizer); // .forEach(elements => elements);
+    //     // console.log('KV1 is: ');
+    //     // console.log(typeof (modKV[1][1]));
+    //     // console.log(modKV[1][1]);
+    //     monaco.languages.setMonarchTokensProvider('scratch-text', {
+    //         tokenizer: {
+    //             root: [
+    //                 // modKV[1][1],
+    //                 // Object.entries(modKV.tokenizer)
+    //                 // Stuck here
+    //                 // Add all tokenizers, as created by the LangDef function
+    //                 // in the 'scratch-text.js' file
+    //                 // e.g.
+    //                 // keyValues.tokenizer
+    //                 [/replace item .+ of .+ with .+/, 'data'],
+    //                 [/Turn .+ degrees right/, 'motion']
+    //                 // [/play sound .+ until done/, 'sound'],
+    //                 // [/stop all sounds/, 'sound'],
+    //                 // [/set .+ effect to .+/, 'sound'],
+    //                 // [/change .+ effect by .+/, 'sound'],
+    //                 // [/clear sound effects/, 'sound'],
+    //                 // [/pitch/, 'sound'],
+    //                 // [/pan left\/right/, 'sound'],
+    //                 // [/change volume by .+/, 'sound'],
+    //                 // [/set volume to .+%/, 'sound'],
+    //                 // [/.+ \+ .+/, 'operator']
+    //                 // // how to populate all elements here?
+    //             ]
+    //         }
+    //     });
+    //     monaco.editor.defineTheme('ScratchTextTheme', {
+    //         base: 'vs',
+    //         inherit: false,
+    //         rules: [
+    //             {token: 'motion', foreground: '4c97ff'},
+    //             {token: 'looks', foreground: '9966ff'},
+    //             {token: 'sound', foreground: 'd65cd6'},
+    //             {token: 'events', foreground: 'ffd500'},
+    //             {token: 'control', foreground: 'ffab19'},
+    //             {token: 'sensing', foreground: '4cbfe6'},
+    //             {token: 'operators', foreground: '40bf4a'},
+    //             {token: 'variables', foreground: 'ff8c1a'},
+    //             {token: 'my-blocks', foreground: 'ff6680'},
+    //             // {token: 'sound', foreground: 'cf63cf'},
+    //             {token: 'data', foreground: 'ff0000', fontStyle: 'bold'}
+    //             // {token: 'operator', foreground: '00ff00'}
+    //         ]
+    //     });
+    //     monaco.languages.registerCompletionItemProvider('scratch-text', {provideCompletionItems: () => {
+    //         const suggestions = [{
+    //             label: 'simpleText',
+    //             kind: monaco.languages.CompletionItemKind.Text,
+    //             insertText: 'simpleText'
+    //         }, {
+    //             label: 'testing',
+    //             kind: monaco.languages.CompletionItemKind.Keyword,
+    //             insertText: 'testing(${1:condition})',
+    //             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+    //         }, {
+    //             label: 'ifelse',
+    //             kind: monaco.languages.CompletionItemKind.Snippet,
+    //             insertText: [
+    //                 'if (${1:condition}) {',
+    //                 '\t$0',
+    //                 '} else {',
+    //                 '\t',
+    //                 '}'
+    //             ].join('\n'),
+    //             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    //             documentation: 'If-Else Statement'
+    //         }];
+    //         return {suggestions: suggestions};
+    //     }});
+    // }
+
+    /**
+     * Sets the current state of the blocks to the passed in blocks object.
+     *
+     * @param {object} blocks The object of blocks to update the current state to
+     */
+    updateBlocks (blocks) {
+        this.setState({blocks});
+    }
+
     editorWillMount (monaco) {
         monaco.languages.register({id: 'scratch-text'});
-        // // monaco.languages.setMonarchTokensProvider('scratch-text', LangDef());
-        // const keyValues = LangDef();
-        // const modKV = Object.entries(keyValues.tokenizer); // .forEach(elements => elements);
-        // console.log('KV1 is: ');
-        // console.log(typeof (modKV[1][1]));
-        // console.log(modKV[1][1]);
         monaco.languages.setMonarchTokensProvider('scratch-text', {
             tokenizer: {
-                root: [
-                    // modKV[1][1],
-                    // Object.entries(modKV.tokenizer)
-                    // Stuck here
-                    // Add all tokenizers, as created by the LangDef function
-                    // in the 'scratch-text.js' file
-                    // e.g.
-                    // keyValues.tokenizer
-                    [/replace item .+ of .+ with .+/, 'data'],
-                    [/Turn .+ degrees right/, 'motion']
-                    // [/play sound .+ until done/, 'sound'],
-                    // [/stop all sounds/, 'sound'],
-                    // [/set .+ effect to .+/, 'sound'],
-                    // [/change .+ effect by .+/, 'sound'],
-                    // [/clear sound effects/, 'sound'],
-                    // [/pitch/, 'sound'],
-                    // [/pan left\/right/, 'sound'],
-                    // [/change volume by .+/, 'sound'],
-                    // [/set volume to .+%/, 'sound'],
-                    // [/.+ \+ .+/, 'operator']
-                    // // how to populate all elements here?
-                ]
+                root: [[/replace item .+ of .+ with .+/, 'data'], [/Turn .+ degrees right/, 'motion']]
             }
         });
         monaco.editor.defineTheme('ScratchTextTheme', {
@@ -92,45 +154,34 @@ class TextEditor extends React.Component {
                 {token: 'operators', foreground: '40bf4a'},
                 {token: 'variables', foreground: 'ff8c1a'},
                 {token: 'my-blocks', foreground: 'ff6680'},
-                // {token: 'sound', foreground: 'cf63cf'},
                 {token: 'data', foreground: 'ff0000', fontStyle: 'bold'}
-                // {token: 'operator', foreground: '00ff00'}
             ]
         });
-        monaco.languages.registerCompletionItemProvider('scratch-text', {provideCompletionItems: () => {
-            const suggestions = [{
-                label: 'simpleText',
-                kind: monaco.languages.CompletionItemKind.Text,
-                insertText: 'simpleText'
-            }, {
-                label: 'testing',
-                kind: monaco.languages.CompletionItemKind.Keyword,
-                insertText: 'testing(${1:condition})',
-                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-            }, {
-                label: 'ifelse',
-                kind: monaco.languages.CompletionItemKind.Snippet,
-                insertText: [
-                    'if (${1:condition}) {',
-                    '\t$0',
-                    '} else {',
-                    '\t',
-                    '}'
-                ].join('\n'),
-                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                documentation: 'If-Else Statement'
-            }];
-            return {suggestions: suggestions};
-        }});
-    }
-
-    /**
-     * Sets the current state of the blocks to the passed in blocks object.
-     *
-     * @param {object} blocks The object of blocks to update the current state to
-     */
-    updateBlocks (blocks) {
-        this.setState({blocks});
+        monaco.languages.registerCompletionItemProvider('scratch-text', {
+            provideCompletionItems: () => {
+                const suggestions = [
+                    {
+                        label: 'simpleText',
+                        kind: monaco.languages.CompletionItemKind.Text,
+                        insertText: 'simpleText'
+                    },
+                    {
+                        label: 'testing',
+                        kind: monaco.languages.CompletionItemKind.Keyword,
+                        insertText: 'testing(${1:condition})',
+                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                    },
+                    {
+                        label: 'ifelse',
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ['if (${1:condition}) {', '\t$0', '} else {', '\t', '}'].join('\n'),
+                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        documentation: 'If-Else Statement'
+                    }
+                ];
+                return {suggestions: suggestions};
+            }
+        });
     }
 
     /**
@@ -230,6 +281,7 @@ class TextEditor extends React.Component {
         // Converts the current list of blocks into a formatted string
         const blocksText = this.displayBlocks(blocks);
 
+        // const options = {automaticLayout: true};
         // Create the monaco editor passing in the converted string of blocks to be defaulted
         return (
             <div
