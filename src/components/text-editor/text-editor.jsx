@@ -59,7 +59,9 @@ class TextEditor extends React.Component {
                     [/set .+ to .+/, 'data'],
                     [/repeat until .+/, 'control'],
                     [/say .+/, 'looks'],
-                    [/.+ \+ .+/, 'operators']
+                    [/.+ \+ .+/, 'operators'],
+                    [/.+ < .+/, 'operators'],
+                    [/.+ > .+/, 'operators']
                 ]
             }
         });
