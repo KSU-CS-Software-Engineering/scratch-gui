@@ -75,10 +75,10 @@ class TextEditor extends React.Component {
                 {token: 'event', foreground: 'ffd500'},
                 {token: 'control', foreground: 'ffab19'},
                 {token: 'sensing', foreground: '4cbfe6'},
-                {token: 'operators', foreground: '40bf4a'},
+                {token: 'operators', foreground: '40bf4a', fontStyle: 'bold'},
                 {token: 'variables', foreground: 'ff8c1a'},
                 {token: 'my-blocks', foreground: 'ff6680'},
-                {token: 'data', foreground: 'ff0000', fontStyle: 'bold'}
+                {token: 'data', foreground: 'ff0000'}
             ]
         });
         monaco.languages.registerCompletionItemProvider('scratch-text', {
@@ -221,7 +221,6 @@ class TextEditor extends React.Component {
                     value={blocksText}
                     width="100%"
                     onChange={this.handleOnChange}
-
                 />
             </div>
         );
