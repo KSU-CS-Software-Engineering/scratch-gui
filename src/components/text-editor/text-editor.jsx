@@ -6,9 +6,8 @@
 import React from 'react';
 import {injectIntl} from 'react-intl';
 import MonacoEditor from 'react-monaco-editor';
-// import LangDef from './scratch-text';
 import styles from './text-editor.css';
-import LangDef from './scratch-text';
+// import LangDef from './scratch-text';
 import PropTypes from 'prop-types';
 
 const options = {
@@ -49,8 +48,8 @@ class TextEditor extends React.Component {
     editorWillMount (monaco) {
         monaco.languages.register({id: 'scratch-text'});
         // // monaco.languages.setMonarchTokensProvider('scratch-text', LangDef());
-        const keyValues = LangDef();
-        const modKV = Object.entries(keyValues.tokenizer); // .forEach(elements => elements);
+        // const keyValues = LangDef();
+        // const modKV = Object.entries(keyValues.tokenizer); // .forEach(elements => elements);
         // console.log('KV1 is: ');
         // console.log(typeof (modKV[1][1]));
         // console.log(modKV[1][1]);
@@ -123,11 +122,6 @@ class TextEditor extends React.Component {
             }];
             return {suggestions: suggestions};
         }});
-        // monaco.editor.create(document.getElementById('container'), {
-        //     theme: 'ScratchTextTheme',
-        //     value: [],
-        //     language: 'scratch-text'
-        // });
     }
 
     /**
