@@ -1,13 +1,15 @@
+/**
+ * Text editor file with monaco information.
+ * For communication with scratch-text.js, look here:
+ * https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-custom-languages
+ */
 import React from 'react';
 import {injectIntl} from 'react-intl';
 import MonacoEditor from 'react-monaco-editor';
 import styles from './text-editor.css';
+// import LangDef from './scratch-text';
 import PropTypes from 'prop-types';
 
-/**
- * This is the component for displaying the text tab.  The monaco editor is displayed
- * and the blocks are converted to a text format and put into the monaco editor.
- */
 class TextEditor extends React.Component {
     /**
      * Intializes the TextEditor class
@@ -21,6 +23,7 @@ class TextEditor extends React.Component {
             newText: ''
         };
         this.handleOnChange = this.handleOnChange.bind(this);
+        this.editorWillMount = this.editorWillMount.bind(this);
     }
 
     /**
@@ -32,6 +35,7 @@ class TextEditor extends React.Component {
     componentDidUpdate (prevProps) {
         if (this.props.blocks !== prevProps.blocks) {
             this.updateBlocks(this.props.blocks);
+            console.log(this.props.blocks);
         }
     }
 
@@ -42,6 +46,78 @@ class TextEditor extends React.Component {
      */
     updateBlocks (blocks) {
         this.setState({blocks});
+    }
+
+    editorWillMount (monaco) {
+        monaco.languages.register({id: 'scratch-text'});
+        monaco.languages.setMonarchTokensProvider('scratch-text', {
+            tokenizer: {
+                root: [
+                    /**
+                     * Do next:
+                     * these are sample root tokenizers
+                     * DO NOT HARD CODE
+                     * use LangDef from ./scratch-text to populate this dynamically
+                     * look in scratch-text for more information about the 'defs' object
+                     * inspect console in browser of console.log(defs)
+                     * to see how defs is structured as an object.
+                     * In order for this to work, you need to manipulate defs to get all
+                     * elements structured like the examples used below.
+                     */
+                    [/replace item .+ of .+ with .+/, 'data'],
+                    [/variable .+/, 'variables'],
+                    [/Turn .+ degrees right/, 'motion'],
+                    [/when .+ clicked/, 'event'],
+                    [/set .+ to .+/, 'data'],
+                    [/repeat until .+/, 'control'],
+                    [/say .+/, 'looks'],
+                    [/.+ \+ .+/, 'operators'],
+                    [/.+ < .+/, 'operators'],
+                    [/.+ > .+/, 'operators']
+                ]
+            }
+        });
+        monaco.editor.defineTheme('ScratchTextTheme', {
+            base: 'vs',
+            inherit: false,
+            rules: [
+                {token: 'motion', foreground: '4c97ff'},
+                {token: 'looks', foreground: '9966ff'},
+                {token: 'sound', foreground: 'd65cd6'},
+                {token: 'event', foreground: 'ffd500'},
+                {token: 'control', foreground: 'ffab19'},
+                {token: 'sensing', foreground: '4cbfe6'},
+                {token: 'operators', foreground: '40bf4a', fontStyle: 'bold'},
+                {token: 'variables', foreground: 'ff8c1a'},
+                {token: 'my-blocks', foreground: 'ff6680'},
+                {token: 'data', foreground: 'ff0000'}
+            ]
+        });
+        monaco.languages.registerCompletionItemProvider('scratch-text', {
+            provideCompletionItems: () => {
+                const suggestions = [
+                    {
+                        label: 'simpleText',
+                        kind: monaco.languages.CompletionItemKind.Text,
+                        insertText: 'simpleText'
+                    },
+                    {
+                        label: 'testing',
+                        kind: monaco.languages.CompletionItemKind.Keyword,
+                        insertText: 'testing(${1:condition})',
+                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                    },
+                    {
+                        label: 'ifelse',
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ['if (${1:condition}) {', '\t$0', '} else {', '\t', '}'].join('\n'),
+                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        documentation: 'If-Else Statement'
+                    }
+                ];
+                return {suggestions: suggestions};
+            }
+        });
     }
 
     /**
@@ -141,14 +217,19 @@ class TextEditor extends React.Component {
         // Converts the current list of blocks into a formatted string
         const blocksText = this.displayBlocks(blocks);
 
+        const options = {automaticLayout: true};
         // Create the monaco editor passing in the converted string of blocks to be defaulted
         return (
-            <div className={styles.editorContainer}>
+            <div
+                className={styles.editorContainer}
+                // id="container"
+            >
                 <MonacoEditor
+                    editorWillMount={this.editorWillMount}
                     height="100%"
-                    language="javascript"
-                    options={{automaticLayout: true}}
-                    theme="vs-dark"
+                    language="scratch-text"
+                    options={options}
+                    theme="ScratchTextTheme"
                     value={blocksText}
                     width="100%"
                     onChange={this.handleOnChange}
